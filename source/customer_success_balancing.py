@@ -4,183 +4,189 @@ from bisect import bisect
 
 CUSTOMER = dict[str, int]
 CUSTOMERS = list[CUSTOMER]
-DISTRIBUTION = list[tuple[int, list[int]]]
 
 
-def sort_by_score(customer: CUSTOMER) -> int:
-    """
-    Get value of key "score".
+class CustomerSuccessBalancing:
+    """Balance between Customer Success and Customers."""
 
-    Parameters
-    ----------
-    customer : CUSTOMER
-        Object to sort in list.
+    def __init__(
+        self,
+        customer_success: CUSTOMERS,
+        customers: CUSTOMERS,
+        customer_success_away: list[int],
+    ) -> None:
+        """
+        Initialize balance class.
 
-    Returns
-    -------
-    int
-        Value of key "score"
+        Parameters
+        ----------
+        customer_success : CUSTOMERS
+            List of Customers Success in company.
+        customers : CUSTOMERS
+            List os Customers to be served.
+        customer_success_away : list[int]
+            List of unavailable Customers Success.
 
-    """
-    return customer["score"]
+        """
+        self.customer_success = self.get_customers_sorted_by_score(
+            self.get_customer_success_available(
+                customer_success, customer_success_away
+            )
+        )
+        self.customers = self.get_customers_sorted_by_score(customers)
+        self.customer_success_id_most_customers = (
+            self.get_customer_success_id_most_customers()
+        )
 
+    def get_customer_success_available(
+        self,
+        customer_success: CUSTOMERS,
+        customer_success_away: list[int],
+    ) -> CUSTOMERS:
+        """
+        Get list of Customers Success available in company.
 
-def sort_list_by_score(unordered_list: CUSTOMERS) -> CUSTOMERS:
-    """
-    Sort a list of customers by ascending score.
+        Parameters
+        ----------
+        customer_success : CUSTOMERS
+            List of all Customers Success in company.
+        customer_success_away : list[int]
+            List of all unavailable Customers Success in company.
 
-    Parameters
-    ----------
-    unordered_list : CUSTOMERS
-        List to be sorted.
+        Returns
+        -------
+        CUSTOMERS
+            List of Customers Success available in company.
 
-    Returns
-    -------
-    CUSTOMERS
-        Sorted list by customers' ascending scores.
+        """
+        return [
+            cs
+            for cs in customer_success
+            if cs["id"] not in customer_success_away
+        ]
 
-    """
-    return sorted(unordered_list, key=sort_by_score)
+    def sort_by_score(self, customer: CUSTOMER) -> int:
+        """
+        Get value of key "score".
 
+        Parameters
+        ----------
+        customer : CUSTOMER
+            Object to sort in list.
 
-def serve_costumers(
-    customer_success_by_score: CUSTOMERS,
-    customers_by_score: CUSTOMERS,
-    customer_success: CUSTOMER,
-    index: int,
-) -> list[int]:
-    """
-    Serve costumers if customer success is able to.
+        Returns
+        -------
+        int
+            Value of key "score"
 
-    Parameters
-    ----------
-    customer_success_by_score : CUSTOMERS
-        List of customers success sorted by ascending scores.
-    customers_by_score : CUSTOMERS
-        List of customers sorted by ascending scores.
-    customer_success : CUSTOMER
-        Customer success to be allocated.
-    index : int
-        Index of customer success sorted by ascending scores.
+        """
+        return customer["score"]
 
-    Returns
-    -------
-    list[int]
-        List of customers' id served by customer success.
+    def get_customers_sorted_by_score(self, customers: CUSTOMERS) -> CUSTOMERS:
+        """
+        Get list of Customers sorted by ascending score.
 
-    """
-    if index == 0:
+        Parameters
+        ----------
+        customers : CUSTOMERS
+            List of Customers to be sorted.
+
+        Returns
+        -------
+        CUSTOMERS
+            List of Customers sorted by ascending scores.
+
+        """
+        return sorted(customers, key=self.sort_by_score)
+
+    def serve_customers(
+        self,
+        customer_success: CUSTOMER,
+        index: int,
+    ) -> list[int]:
+        """
+        Serve Customers if Customer Success is able to.
+
+        Parameters
+        ----------
+        customer_success : CUSTOMER
+            Customer Success to be allocated.
+        index : int
+            Index of Customer Success sorted by ascending scores.
+
+        Returns
+        -------
+        list[int]
+            List of Customers' id served by Customer Success.
+
+        """
+        if index == 0:
+            return [
+                customer["id"]
+                for customer in self.customers[
+                    : bisect(
+                        self.customers,
+                        customer_success["score"],
+                        key=self.sort_by_score,
+                    )
+                ]
+            ]
         return [
             customer["id"]
-            for customer in customers_by_score[
+            for customer in self.customers[
                 : bisect(
-                    customers_by_score,
+                    self.customers,
                     customer_success["score"],
-                    key=sort_by_score,
+                    key=self.sort_by_score,
                 )
             ]
+            if customer["score"] > self.customer_success[index - 1]["score"]
         ]
-    return [
-        customer["id"]
-        for customer in customers_by_score[
-            : bisect(
-                customers_by_score,
-                customer_success["score"],
-                key=sort_by_score,
-            )
+
+    def balance_customer_success_and_customers(
+        self,
+    ) -> CUSTOMERS:
+        """
+        Distribute Customers for each Customer Success able to serve them.
+
+        Returns
+        -------
+        CUSTOMERS
+            List of dictionaries with each Customer Success' id and the number
+            of Customers the person is serving.
+
+        """
+        return [
+            {
+                "id": customer_success["id"],
+                "serving": len(
+                    self.serve_customers(
+                        customer_success,
+                        index,
+                    )
+                ),
+            }
+            for index, customer_success in enumerate(self.customer_success)
         ]
-        if customer["score"] > customer_success_by_score[index - 1]["score"]
-    ]
 
+    def get_customer_success_id_most_customers(self) -> int:
+        """
+        Get Id of the available Customer Success with the most Customers.
 
-def distribute_customers_for_customer_success(
-    customer_success_by_score: CUSTOMERS,
-    customers_by_score: CUSTOMERS,
-) -> DISTRIBUTION:
-    """
-    Distribute customers for each customer success able to.
+        Returns
+        -------
+        int
+            Id of the available Customer Success with the most Customers, 0 if
+            tied.
 
-    Parameters
-    ----------
-    customer_success_by_score : CUSTOMERS
-        List of customers success sorted by ascending scores.
-    customers_by_score : CUSTOMERS
-        List of customers sorted by ascending scores.
-
-    Returns
-    -------
-    DISTRIBUTION
-        List of tuples with each customer success' id and the List of
-        customers' id served by the person.
-
-    """
-    return [
-        (
-            customer_success["id"],
-            serve_costumers(
-                customer_success_by_score,
-                customers_by_score,
-                customer_success,
-                index,
-            ),
+        """
+        balance = sorted(
+            self.balance_customer_success_and_customers(),
+            key=lambda key: key["serving"],
+            reverse=True,
         )
-        for index, customer_success in enumerate(customer_success_by_score)
-    ]
-
-
-def get_balance(distribution: DISTRIBUTION) -> int:
-    """
-    Get balance of customers success' serving.
-
-    Parameters
-    ----------
-    distribution : DISTRIBUTION
-        List of tuples with each customer success' id and the List of
-        customers' id served by the person.
-
-    Returns
-    -------
-    int
-        Id of the available Customer Success with the most customers, 0 if
-        tied.
-
-    """
-    balance = sorted(distribution, key=lambda key: len(key[1]), reverse=True)
-    return 0 if len(balance[0][1]) == len(balance[1][1]) else balance[0][0]
-
-
-def customer_success_balancing(
-    customer_success: CUSTOMERS,
-    customers: CUSTOMERS,
-    customer_success_away: list[int],
-) -> int:
-    """
-    Return the id of the Customer Success with the most customers.
-
-    Parameters
-    ----------
-    customer_success : CUSTOMERS
-        List of customers success from company.
-    customers : CUSTOMERS
-        List os customers to be served.
-    customer_success_away : list[int]
-        List of unavailable customers success.
-
-    Returns
-    -------
-    int
-        Id of the available Customer Success with the most customers, 0 if
-        tied.
-
-    """
-    customer_success_available = [
-        cs for cs in customer_success if cs["id"] not in customer_success_away
-    ]
-    customer_success_available_by_score = sort_list_by_score(
-        customer_success_available,
-    )
-    customers_by_score = sort_list_by_score(customers)
-    distribution = distribute_customers_for_customer_success(
-        customer_success_available_by_score, customers_by_score
-    )
-    return get_balance(distribution)
+        return (
+            0
+            if balance[0]["serving"] == balance[1]["serving"]
+            else balance[0]["id"]
+        )

@@ -2,7 +2,7 @@
 
 import pytest
 
-from source.customer_success_balancing import customer_success_balancing
+from source.customer_success_balancing import CustomerSuccessBalancing
 
 
 # Start of company written tests ##############################################
@@ -45,7 +45,12 @@ def test_scenario_1() -> None:
     ]
     cs_away = [2, 4]
 
-    assert customer_success_balancing(css, customers, cs_away) == 1
+    assert (
+        CustomerSuccessBalancing(
+            css, customers, cs_away
+        ).customer_success_id_most_customers
+        == 1
+    )
 
 
 def test_scenario_2() -> None:
@@ -55,7 +60,12 @@ def test_scenario_2() -> None:
     customers = map_entities([10, 10, 10, 20, 20, 30, 30, 30, 20, 60])
     cs_away: list[int] = []
 
-    assert customer_success_balancing(css, customers, cs_away) == 0
+    assert (
+        CustomerSuccessBalancing(
+            css, customers, cs_away
+        ).customer_success_id_most_customers
+        == 0
+    )
 
 
 @pytest.mark.timeout(0.1)
@@ -66,7 +76,12 @@ def test_scenario_3() -> None:
     customers = build_size_entities(10000, 998)
     cs_away = [999]
 
-    assert customer_success_balancing(css, customers, cs_away) == 998
+    assert (
+        CustomerSuccessBalancing(
+            css, customers, cs_away
+        ).customer_success_id_most_customers
+        == 998
+    )
 
 
 def test_scenario_4() -> None:
@@ -76,7 +91,12 @@ def test_scenario_4() -> None:
     customers = map_entities([10, 10, 10, 20, 20, 30, 30, 30, 20, 60])
     cs_away: list[int] = []
 
-    assert customer_success_balancing(css, customers, cs_away) == 0
+    assert (
+        CustomerSuccessBalancing(
+            css, customers, cs_away
+        ).customer_success_id_most_customers
+        == 0
+    )
 
 
 def test_scenario_5() -> None:
@@ -86,7 +106,12 @@ def test_scenario_5() -> None:
     customers = map_entities([10, 10, 10, 20, 20, 30, 30, 30, 20, 60])
     cs_away: list[int] = []
 
-    assert customer_success_balancing(css, customers, cs_away) == 1
+    assert (
+        CustomerSuccessBalancing(
+            css, customers, cs_away
+        ).customer_success_id_most_customers
+        == 1
+    )
 
 
 def test_scenario_6() -> None:
@@ -96,7 +121,12 @@ def test_scenario_6() -> None:
     customers = map_entities([10, 10, 10, 20, 20, 30, 30, 30, 20, 60])
     cs_away = [1, 3, 2]
 
-    assert customer_success_balancing(css, customers, cs_away) == 0
+    assert (
+        CustomerSuccessBalancing(
+            css, customers, cs_away
+        ).customer_success_id_most_customers
+        == 0
+    )
 
 
 def test_scenario_7() -> None:
@@ -106,7 +136,12 @@ def test_scenario_7() -> None:
     customers = map_entities([10, 10, 10, 20, 20, 30, 30, 30, 20, 60])
     cs_away = [4, 5, 6]
 
-    assert customer_success_balancing(css, customers, cs_away) == 3
+    assert (
+        CustomerSuccessBalancing(
+            css, customers, cs_away
+        ).customer_success_id_most_customers
+        == 3
+    )
 
 
 # End of company written tests ################################################
