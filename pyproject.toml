@@ -1,0 +1,53 @@
+[tool.poetry]
+name = "csb"
+version = "0.1.0"
+description = "Technical challenge for selective process."
+authors = ["Mateus Oliveira"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.961"
+prospector = "^1.7.7"
+bandit = "^1.7.4"
+black = "^22.3.0"
+editorconfig-checker = "^2.4.0"
+isort = "^5.10.1"
+safety = "^1.10.3"
+pytest = "^7.1.2"
+pytest-cov = "^3.0.0"
+pytest-timeout = "^2.1.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+filterwarnings = "error"
+addopts = [
+    "-vv",
+    "-s",
+    "--cov-report=term-missing",
+    "--cov-report=html:tests/coverage-results/htmlcov",
+    "--cov=source",
+    "--cov-fail-under=100",
+]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+show_error_codes = true
+
+[tool.isort]
+profile = "black"
+line_length = 79
+verbose = true
+multi_line_output = 3
+include_trailing_comma = true
+skip_gitignore = true
+
+[tool.black]
+line-length = 79
+verbose = true
